@@ -1,4 +1,4 @@
-#include "EaaS/EaaS_nvs.h"
+#include "EaaS_nvs.h"
 
 #include <Arduino.h>
 

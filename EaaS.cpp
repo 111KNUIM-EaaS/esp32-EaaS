@@ -1,8 +1,8 @@
-#include "EaaS/EaaS.h"
-#include "EaaS/EaaS_nvs.h"
-#include "EaaS/EaaS_network.h"
-#include "EaaS/EaaS_client.h"
-#include "EaaS/EaaS_OTA.h"
+#include "EaaS.h"
+#include "EaaS_nvs.h"
+#include "EaaS_network.h"
+#include "EaaS_client.h"
+#include "EaaS_OTA.h"
 
 #include <Arduino.h>
 

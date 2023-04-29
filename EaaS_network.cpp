@@ -1,4 +1,4 @@
-#include "EaaS/EaaS_network.h"
+#include "EaaS_network.h"
 
 // include Arduino headers
 #include <Arduino.h>

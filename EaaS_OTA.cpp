@@ -1,5 +1,5 @@
-#include "EaaS/EaaS_OTA.h"
-#include "EaaS/EaaS_header.h"
+#include "EaaS_OTA.h"
+#include "EaaS_header.h"
 
 #include <WiFi.h>
 #include <HTTPClient.h>

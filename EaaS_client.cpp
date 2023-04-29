@@ -1,5 +1,5 @@
-#include "EaaS/EaaS_client.h"
-#include "EaaS/EaaS_header.h"
+#include "EaaS_client.h"
+#include "EaaS_header.h"
 
 #include <Arduino.h>
 #include <esp_log.h>
