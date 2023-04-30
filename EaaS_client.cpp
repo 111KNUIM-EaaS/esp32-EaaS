@@ -6,7 +6,7 @@
 #include <esp_tls.h>
 #include <esp_http_client.h>
 
-static uint8_t _machine_status = 0;
+static uint8_t _machine_status = 7;
 
 static char *_user   = NULL;
 static char *_passwd = NULL;
@@ -61,7 +61,13 @@ void data_handler(const char *data, int len) {
         ESP_LOGI(DATA_HANDLER_TAG, "otaing data");
         _machine_status = 5;
     } else if(strcmp(data, "results6") == 0) {
-        ESP_LOGI(DATA_HANDLER_TAG, "ota data");
+        if(_machine_status == 7) {
+            ESP_LOGI(DATA_HANDLER_TAG, "ota data finished!");
+            _machine_status = 3;
+        }
+
+        ESP_LOGI(DATA_HANDLER_TAG, "ota data restart");
+        esp_restart();
         _machine_status = 6;
     } else {
         ESP_LOGI(DATA_HANDLER_TAG, "Unknown data");

@@ -4,6 +4,8 @@
 #include "EaaS_client.h"
 #include "EaaS_OTA.h"
 
+#include "driver/gpio.h"
+
 #include <Arduino.h>
 
 #include <esp_log.h>
@@ -13,12 +15,13 @@ static uint8_t machine_status = 0;
 static char* user_passwd   = NULL;
 static char* user_name     = NULL;
 
+static TaskHandle_t EaaS_init_blink_handle;
 static TaskHandle_t EaaS_handle;
 
 uint8_t task_status = 0;
 
 void loop_eaas(void *parameter) {
-    set_machine_status(4);
+    // set_machine_status(4);
 
     uint64_t count = 0;
     ESP_LOGI("Loop EaaS", "Loop EaaS task started");
@@ -71,8 +74,32 @@ void loop_eaas(void *parameter) {
     vTaskDelete(NULL);
 }
 
+void blink_loop(void *parameter) {
+    while(1) {
+        gpio_set_level(GPIO_NUM_2, 1);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        gpio_set_level(GPIO_NUM_2, 0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
 void init_EaaS(void) {
     ESP_LOGI("Build Date Time", "%s %s", __DATE__,  __TIME__);
+    gpio_config_t io_conf = {
+        .pin_bit_mask   = (1ULL << (GPIO_NUM_2)),
+        .mode           = GPIO_MODE_OUTPUT,
+        .pull_up_en     = GPIO_PULLUP_DISABLE,
+        .pull_down_en   = GPIO_PULLDOWN_DISABLE,
+        .intr_type      = GPIO_INTR_DISABLE,
+    };
+
+    gpio_config(&io_conf);
+
+    gpio_set_level(GPIO_NUM_2, 0);
+
+    xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, NULL, 1, &EaaS_init_blink_handle, 0 );
+
     char* sta_ssid      = NULL;
     char* sta_passwd    = NULL;
 
@@ -95,6 +122,9 @@ void init_EaaS(void) {
     init_client(user_name, user_passwd);
     init_EaaS_OTA(user_name, user_passwd);
 
+    vTaskDelete(EaaS_init_blink_handle);
+    gpio_set_level(GPIO_NUM_2, 1);
+
     // 327680
     // 102400
     xTaskCreatePinnedToCore( loop_eaas, "machine_task", 102400, NULL, 1, &EaaS_handle, 0 );
@@ -102,9 +132,15 @@ void init_EaaS(void) {
 
 void EaaS_OTA() {
     if(task_status == 2) {
+        vTaskDelete(EaaS_handle);
+        xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, NULL, 1, &EaaS_init_blink_handle, 0 );
+        
         flash_EaaS_firmware();
+        
+        vTaskDelete(EaaS_init_blink_handle);
+        gpio_set_level(GPIO_NUM_2, 1);
+        
         set_machine_status(6);
-        delay(1000);
-        esp_restart();
+        xTaskCreatePinnedToCore( loop_eaas, "machine_task", 102400, NULL, 1, &EaaS_handle, 0 );
     }
 }
