@@ -41,6 +41,12 @@ void data_handler(const char *data, int len) {
         return;
     }
 
+    if(strcmp(data, "Success results6") == 0) {
+        ESP_LOGE(DATA_HANDLER_TAG, "ota data restart");
+        esp_restart();
+        return;
+    }
+
     // 0: offline, 1: booting, 2: boot, 3: pausing, 4: pause
     if (strcmp(data, "results0") == 0) {
         ESP_LOGI(DATA_HANDLER_TAG, "offline data");
@@ -61,13 +67,7 @@ void data_handler(const char *data, int len) {
         ESP_LOGI(DATA_HANDLER_TAG, "otaing data");
         _machine_status = 5;
     } else if(strcmp(data, "results6") == 0) {
-        if(_machine_status == 7) {
-            ESP_LOGI(DATA_HANDLER_TAG, "ota data finished!");
-            _machine_status = 3;
-        }
-
-        ESP_LOGI(DATA_HANDLER_TAG, "ota data restart");
-        esp_restart();
+        ESP_LOGI(DATA_HANDLER_TAG, "ota data Finish");
         _machine_status = 6;
     } else {
         ESP_LOGI(DATA_HANDLER_TAG, "Unknown data");

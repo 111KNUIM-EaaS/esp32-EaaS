@@ -75,12 +75,14 @@ void loop_eaas(void *parameter) {
 }
 
 void blink_loop(void *parameter) {
+    uint16_t *delay_time = (uint16_t*)parameter;
+
     while(1) {
         gpio_set_level(GPIO_NUM_2, 1);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(*delay_time / portTICK_PERIOD_MS);
 
         gpio_set_level(GPIO_NUM_2, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(*delay_time / portTICK_PERIOD_MS);
     }
 }
 
@@ -97,8 +99,8 @@ void init_EaaS(void) {
     gpio_config(&io_conf);
 
     gpio_set_level(GPIO_NUM_2, 0);
-
-    xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, NULL, 1, &EaaS_init_blink_handle, 0 );
+    uint16_t delay_time = 1000;
+    xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, &delay_time, 1, &EaaS_init_blink_handle, 0 );
 
     char* sta_ssid      = NULL;
     char* sta_passwd    = NULL;
@@ -133,7 +135,8 @@ void init_EaaS(void) {
 void EaaS_OTA() {
     if(task_status == 2) {
         vTaskDelete(EaaS_handle);
-        xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, NULL, 1, &EaaS_init_blink_handle, 0 );
+        uint16_t delay_time = 100;
+        xTaskCreatePinnedToCore( blink_loop, "EaaS init blink", 1024, &delay_time, 1, &EaaS_init_blink_handle, 0 );
         
         flash_EaaS_firmware();
         
